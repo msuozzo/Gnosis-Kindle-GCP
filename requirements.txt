@@ -1,0 +1,5 @@
+aduro==0.0.1a0
+gunicorn==19.3.0
+webapp2==2.5.2
+WebOb==1.5.1
+wheel==0.24.0
