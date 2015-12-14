@@ -1,5 +1,4 @@
-#FROM gcr.io/google_appengine/base
-FROM gcr.io/google_appengine/python-compat
+FROM gcr.io/google_appengine/python
 
 RUN apt-get -q update && \
   apt-get install --no-install-recommends -y -q \
@@ -31,8 +30,7 @@ ENV PATH /phantomjs/$PHANTOM_NAME/bin:$PATH
 ENV VIRTUAL_ENV /env
 ENV PATH $VIRTUAL_ENV/bin:$PATH
 
-WORKDIR $VIRTUAL_ENV
-RUN virtualenv .
+RUN virtualenv $VIRTUAL_ENV
 
 # Install app and dependencies
 WORKDIR /app
@@ -43,15 +41,16 @@ EXPOSE $PORT
 ADD . .
 
 # Install all python requirements
-# sed step ensures the HTTP method used to clone repositories in lieu of
-# a proper SSH authentication credential (i.e. private key)
 ENV LIB_DIR /app/lib
 RUN mkdir $LIB_DIR
+
+# NOTE: sed step ensures the HTTP method used to clone repositories in lieu of
+#       a proper SSH authentication credential (i.e. private key).
+# NOTE: Second pip step fixes paths on local Docker container.
 RUN for req in `find . -name requirements.txt`; do \
         sed -i 's?git@github.com:?https://github.com/?' $req && \
             pip install -t $LIB_DIR -r $req; \
+            pip install -r $req; \
     done;
 
-CMD []
-
-CMD gunicorn -b 0.0.0.0:$PORT main:app
+ENTRYPOINT $VIRTUAL_ENV/bin/gunicorn -b 0.0.0.0:$PORT main:app

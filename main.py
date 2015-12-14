@@ -1,5 +1,4 @@
 import json
-
 import webapp2
 
 # Add local "lib" directory to import path
