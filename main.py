@@ -1,10 +1,11 @@
 import json
-import webapp2
 
 # Add local "lib" directory to import path
 from google.appengine.ext import vendor
 vendor.add('lib')
 
+# NOTE: Import all third-party dependencies below this line
+import webapp2
 import lector
 
 

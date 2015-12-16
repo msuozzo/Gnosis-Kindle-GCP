@@ -42,15 +42,17 @@ ADD . .
 
 # Install all python requirements
 ENV LIB_DIR /app/lib
-RUN mkdir $LIB_DIR
+RUN mkdir -p $LIB_DIR
 
 # NOTE: sed step ensures the HTTP method used to clone repositories in lieu of
 #       a proper SSH authentication credential (i.e. private key).
-# NOTE: Second pip step fixes paths on local Docker container.
 RUN for req in `find . -name requirements.txt`; do \
         sed -i 's?git@github.com:?https://github.com/?' $req && \
             pip install -t $LIB_DIR -r $req; \
-            pip install -r $req; \
     done;
+
+# `pip install -t ...` does not build a gunicorn binary which is required for
+# the Docker container entrypoint
+RUN pip install gunicorn
 
 ENTRYPOINT $VIRTUAL_ENV/bin/gunicorn -b 0.0.0.0:$PORT main:app
